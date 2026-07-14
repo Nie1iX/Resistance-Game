@@ -8,7 +8,7 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message, User
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from resistance.domain import JoinResult, MissionCountResult, Player, StartResult
+from resistance.domain import JoinResult, Lobby, MissionCountResult, Player, StartResult
 from resistance.game import GamePlayer, Match, MissionResult, Phase, Role, TeamVoteResult
 from resistance.game_store import CreateResult, GameStore
 from resistance.i18n import DEFAULT_LANGUAGE, Translator
@@ -29,7 +29,9 @@ def create_game_router(
 
     @router.message(Command("start"))
     async def start(message: Message) -> None:
-        await message.answer(_translator(settings, message).text("start.description"))
+        translator = _translator(settings, message)
+        keyboard = _main_menu_keyboard(translator, message.chat.id) if _is_group(message) else None
+        await message.answer(translator.text("start.description"), reply_markup=keyboard)
 
     @router.message(Command("help"))
     async def help_command(message: Message) -> None:
@@ -48,63 +50,25 @@ def create_game_router(
         await message.answer(_translator(settings, message).text("ping"))
 
     @router.message(Command("newgame"))
-    async def new_game(message: Message) -> None:
+    async def new_game(message: Message, bot: Bot) -> None:
         if not _is_group(message):
             await message.answer(_translator(settings, message).text("group.only"))
             return
-        result = games.create_lobby(message.chat.id, _user(message).id)
-        key = "lobby.created" if result is CreateResult.CREATED else "lobby.exists"
-        await message.answer(_translator(settings, message).text(key))
+        await _create_lobby(bot, games, settings, message.chat.id, _user(message))
 
     @router.message(Command("join"))
     async def join(message: Message, bot: Bot) -> None:
         if not _is_group(message):
             await message.answer(_translator(settings, message).text("group.only"))
             return
-        user = _user(message)
-        translator = _translator(settings, message)
-        if games.lobby(message.chat.id) is not None:
-            try:
-                await bot.send_message(user.id, _user_translator(settings, user).text("start.description"))
-            except TelegramForbiddenError:
-                await message.answer(translator.text("join.private_chat"))
-                return
-        result = games.join(message.chat.id, Player(user.id, user.full_name))
-        keys = {
-            JoinResult.JOINED: "lobby.joined",
-            JoinResult.ALREADY_JOINED: "lobby.already_joined",
-            JoinResult.FULL: "lobby.full",
-            JoinResult.STARTED: "lobby.started",
-            JoinResult.MISSING: "lobby.missing",
-        }
-        values = {"name": user.full_name} if result is JoinResult.JOINED else {}
-        await message.answer(translator.text(keys[result], **values))
+        await _join_lobby(bot, games, settings, message.chat.id, _user(message))
 
     @router.message(Command("startgame"))
     async def start_game(message: Message, bot: Bot) -> None:
         if not _is_group(message):
             await message.answer(_translator(settings, message).text("group.only"))
             return
-        user = _user(message)
-        result = games.start(
-            message.chat.id,
-            user.id,
-            await _is_group_admin(bot, message.chat.id, user.id),
-        )
-        translator = _translator(settings, message)
-        key = {
-            StartResult.MISSING: "lobby.missing",
-            StartResult.UNAUTHORIZED: "lobby.start_forbidden",
-            StartResult.TOO_FEW_PLAYERS: "lobby.need_players",
-        }.get(result)
-        if key is not None:
-            await message.answer(translator.text(key))
-            return
-        match = games.match(message.chat.id)
-        assert match is not None
-        await message.answer(translator.text("game.started", players=len(match.players)))
-        await _inform_roles(bot, settings, match)
-        await _advance(bot, settings, match)
+        await _start_lobby(bot, games, settings, message.chat.id, _user(message))
 
     @router.message(Command("missions"))
     async def missions(message: Message, bot: Bot) -> None:
@@ -115,41 +79,87 @@ def create_game_router(
         if len(parts) != 2 or parts[1] not in {"3", "5"}:
             await message.answer(_translator(settings, message).text("missions.usage"))
             return
-        user = _user(message)
-        result = games.set_mission_count(
-            message.chat.id,
-            user.id,
-            await _is_group_admin(bot, message.chat.id, user.id),
-            int(parts[1]),
+        await _set_lobby_missions(
+            bot, games, settings, message.chat.id, _user(message), int(parts[1])
         )
-        key = {
-            MissionCountResult.UPDATED: "missions.updated",
-            MissionCountResult.UNAUTHORIZED: "lobby.start_forbidden",
-            MissionCountResult.INVALID: "missions.usage",
-            MissionCountResult.STARTED: "lobby.started",
-            MissionCountResult.MISSING: "lobby.missing",
-        }[result]
-        await message.answer(_translator(settings, message).text(key, count=parts[1]))
 
     @router.message(Command("cancelgame"))
     async def cancel_game(message: Message, bot: Bot) -> None:
         if not _is_group(message):
             await message.answer(_translator(settings, message).text("group.only"))
             return
+        await _cancel_lobby(bot, games, settings, message.chat.id, _user(message))
+
+    @router.callback_query(GameCallback.filter(F.operation == "lobby_create"))
+    async def lobby_create(
+        callback: CallbackQuery, callback_data: GameCallback, bot: Bot
+    ) -> None:
+        message = _group_callback_message(callback, callback_data)
+        if message is None:
+            await callback.answer()
+            return
+        await callback.answer()
+        await _create_lobby(bot, games, settings, message.chat.id, callback.from_user)
+
+    @router.callback_query(GameCallback.filter(F.operation == "lobby_join"))
+    async def lobby_join(
+        callback: CallbackQuery, callback_data: GameCallback, bot: Bot
+    ) -> None:
+        message = _group_callback_message(callback, callback_data)
+        if message is None:
+            await callback.answer()
+            return
+        await callback.answer()
+        await _join_lobby(bot, games, settings, message.chat.id, callback.from_user)
+
+    @router.callback_query(GameCallback.filter(F.operation == "lobby_missions"))
+    async def lobby_missions(
+        callback: CallbackQuery, callback_data: GameCallback, bot: Bot
+    ) -> None:
+        message = _group_callback_message(callback, callback_data)
+        if message is None or callback_data.value not in {"3", "5"}:
+            await callback.answer()
+            return
+        await callback.answer()
+        result = await _set_lobby_missions(
+            bot,
+            games,
+            settings,
+            message.chat.id,
+            callback.from_user,
+            int(callback_data.value),
+        )
         lobby = games.lobby(message.chat.id)
-        match = games.match(message.chat.id)
-        initiator_id = lobby.initiator_id if lobby is not None else None
-        if initiator_id is None and match is not None:
-            initiator_id = match.initiator_id
-        if initiator_id is None:
-            await message.answer(_translator(settings, message).text("lobby.missing"))
+        if result is MissionCountResult.UPDATED and lobby is not None:
+            await bot.edit_message_reply_markup(
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                reply_markup=_lobby_keyboard(
+                    _group_translator(settings, message.chat.id), lobby
+                ),
+            )
+
+    @router.callback_query(GameCallback.filter(F.operation == "lobby_start"))
+    async def lobby_start(
+        callback: CallbackQuery, callback_data: GameCallback, bot: Bot
+    ) -> None:
+        message = _group_callback_message(callback, callback_data)
+        if message is None:
+            await callback.answer()
             return
-        user = _user(message)
-        if user.id != initiator_id and not await _is_group_admin(bot, message.chat.id, user.id):
-            await message.answer(_translator(settings, message).text("lobby.start_forbidden"))
+        await callback.answer()
+        await _start_lobby(bot, games, settings, message.chat.id, callback.from_user)
+
+    @router.callback_query(GameCallback.filter(F.operation == "lobby_cancel"))
+    async def lobby_cancel(
+        callback: CallbackQuery, callback_data: GameCallback, bot: Bot
+    ) -> None:
+        message = _group_callback_message(callback, callback_data)
+        if message is None:
+            await callback.answer()
             return
-        games.cancel(message.chat.id)
-        await message.answer(_translator(settings, message).text("game.cancelled"))
+        await callback.answer()
+        await _cancel_lobby(bot, games, settings, message.chat.id, callback.from_user)
 
     @router.message(Command("board"))
     async def board(message: Message) -> None:
@@ -297,6 +307,105 @@ def create_game_router(
     return router
 
 
+async def _create_lobby(
+    bot: Bot, games: GameStore, settings: SettingsStore, chat_id: int, user: User
+) -> None:
+    result = games.create_lobby(chat_id, user.id)
+    translator = _group_translator(settings, chat_id)
+    lobby = games.lobby(chat_id)
+    keyboard = _lobby_keyboard(translator, lobby) if lobby is not None else None
+    key = "lobby.created" if result is CreateResult.CREATED else "lobby.exists"
+    await bot.send_message(chat_id, translator.text(key), reply_markup=keyboard)
+
+
+async def _join_lobby(
+    bot: Bot, games: GameStore, settings: SettingsStore, chat_id: int, user: User
+) -> None:
+    translator = _group_translator(settings, chat_id)
+    if games.lobby(chat_id) is not None:
+        try:
+            await bot.send_message(user.id, _user_translator(settings, user).text("start.description"))
+        except TelegramForbiddenError:
+            await bot.send_message(chat_id, translator.text("join.private_chat"))
+            return
+    result = games.join(chat_id, Player(user.id, user.full_name))
+    keys = {
+        JoinResult.JOINED: "lobby.joined",
+        JoinResult.ALREADY_JOINED: "lobby.already_joined",
+        JoinResult.FULL: "lobby.full",
+        JoinResult.STARTED: "lobby.started",
+        JoinResult.MISSING: "lobby.missing",
+    }
+    values = {"name": user.full_name} if result is JoinResult.JOINED else {}
+    await bot.send_message(chat_id, translator.text(keys[result], **values))
+
+
+async def _start_lobby(
+    bot: Bot, games: GameStore, settings: SettingsStore, chat_id: int, user: User
+) -> None:
+    result = games.start(chat_id, user.id, await _is_group_admin(bot, chat_id, user.id))
+    translator = _group_translator(settings, chat_id)
+    key = {
+        StartResult.MISSING: "lobby.missing",
+        StartResult.UNAUTHORIZED: "lobby.start_forbidden",
+        StartResult.TOO_FEW_PLAYERS: "lobby.need_players",
+    }.get(result)
+    if key is not None:
+        await bot.send_message(chat_id, translator.text(key))
+        return
+    match = games.match(chat_id)
+    assert match is not None
+    await bot.send_message(chat_id, translator.text("game.started", players=len(match.players)))
+    await _inform_roles(bot, settings, match)
+    await _advance(bot, settings, match)
+
+
+async def _set_lobby_missions(
+    bot: Bot,
+    games: GameStore,
+    settings: SettingsStore,
+    chat_id: int,
+    user: User,
+    mission_count: int,
+) -> MissionCountResult:
+    result = games.set_mission_count(
+        chat_id,
+        user.id,
+        await _is_group_admin(bot, chat_id, user.id),
+        mission_count,
+    )
+    key = {
+        MissionCountResult.UPDATED: "missions.updated",
+        MissionCountResult.UNAUTHORIZED: "lobby.start_forbidden",
+        MissionCountResult.INVALID: "missions.usage",
+        MissionCountResult.STARTED: "lobby.started",
+        MissionCountResult.MISSING: "lobby.missing",
+    }[result]
+    await bot.send_message(
+        chat_id, _group_translator(settings, chat_id).text(key, count=mission_count)
+    )
+    return result
+
+
+async def _cancel_lobby(
+    bot: Bot, games: GameStore, settings: SettingsStore, chat_id: int, user: User
+) -> None:
+    lobby = games.lobby(chat_id)
+    match = games.match(chat_id)
+    initiator_id = lobby.initiator_id if lobby is not None else None
+    if initiator_id is None and match is not None:
+        initiator_id = match.initiator_id
+    translator = _group_translator(settings, chat_id)
+    if initiator_id is None:
+        await bot.send_message(chat_id, translator.text("lobby.missing"))
+        return
+    if user.id != initiator_id and not await _is_group_admin(bot, chat_id, user.id):
+        await bot.send_message(chat_id, translator.text("lobby.start_forbidden"))
+        return
+    games.cancel(chat_id)
+    await bot.send_message(chat_id, translator.text("game.cancelled"))
+
+
 async def _advance(bot: Bot, settings: SettingsStore, match: Match) -> None:
     group_translator = _group_translator(settings, match.chat_id)
     if match.phase is Phase.BUILD_TEAM:
@@ -347,6 +456,49 @@ async def _advance(bot: Bot, settings: SettingsStore, match: Match) -> None:
                 translator.text("mission.prompt"),
                 reply_markup=_mission_keyboard(translator, match, player),
             )
+
+
+def _main_menu_keyboard(translator: Translator, chat_id: int) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text=translator.text("menu.create"),
+        callback_data=GameCallback(chat_id=chat_id, operation="lobby_create", value="go"),
+    )
+    return builder.as_markup()
+
+
+def _lobby_keyboard(translator: Translator, lobby: Lobby) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text=translator.text("menu.join"),
+        callback_data=GameCallback(
+            chat_id=lobby.chat_id, operation="lobby_join", value="go"
+        ),
+    )
+    for mission_count in (3, 5):
+        selected = "✓ " if lobby.mission_count == mission_count else ""
+        builder.button(
+            text=f"{selected}{translator.text(f'menu.missions.{mission_count}')}",
+            callback_data=GameCallback(
+                chat_id=lobby.chat_id,
+                operation="lobby_missions",
+                value=str(mission_count),
+            ),
+        )
+    builder.button(
+        text=translator.text("menu.start"),
+        callback_data=GameCallback(
+            chat_id=lobby.chat_id, operation="lobby_start", value="go"
+        ),
+    )
+    builder.button(
+        text=translator.text("menu.cancel"),
+        callback_data=GameCallback(
+            chat_id=lobby.chat_id, operation="lobby_cancel", value="go"
+        ),
+    )
+    builder.adjust(1, 2, 2)
+    return builder.as_markup()
 
 
 def _team_keyboard(translator: Translator, match: Match) -> InlineKeyboardMarkup:
@@ -490,6 +642,19 @@ def _active_voting(match: Match | None) -> tuple[list[int], dict[int, bool]] | N
     ):
         return match.proposed_team, match.mission_votes
     return None
+
+
+def _group_callback_message(
+    callback: CallbackQuery, callback_data: GameCallback
+) -> Message | None:
+    message = callback.message
+    if (
+        not isinstance(message, Message)
+        or not _is_group(message)
+        or message.chat.id != callback_data.chat_id
+    ):
+        return None
+    return message
 
 
 async def _unavailable(callback: CallbackQuery, settings: SettingsStore, match: Match) -> None:

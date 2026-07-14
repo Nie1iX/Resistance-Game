@@ -6,7 +6,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "start.description"
-msgstr "«Сопротивление: Оборотни» — игра на социальную дедукцию для 5–10 игроков. Добавьте бота в группу и используйте /newgame."
+msgstr "«Сопротивление: Оборотни» — игра на социальную дедукцию для 5–10 игроков. Добавьте бота в группу и используйте кнопку ниже или /newgame."
 
 msgid "help.commands"
 msgstr "Команды: /newgame, /join, /missions, /startgame, /cancelgame, /board, /votes, /calltovote, /stats, /language, /grouplanguage."
@@ -19,6 +19,24 @@ msgstr "Символы: ✅ проклятие снято, ❌ жители ат
 
 msgid "ping"
 msgstr "pong"
+
+msgid "menu.create"
+msgstr "Создать игру"
+
+msgid "menu.join"
+msgstr "Присоединиться"
+
+msgid "menu.missions.3"
+msgstr "3 миссии"
+
+msgid "menu.missions.5"
+msgstr "5 миссий"
+
+msgid "menu.start"
+msgstr "Начать игру"
+
+msgid "menu.cancel"
+msgstr "Отменить игру"
 
 msgid "error.unavailable"
 msgstr "Это действие больше недоступно."

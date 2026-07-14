@@ -6,7 +6,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "start.description"
-msgstr "Resistance: Werewolves is a social deduction game for 5-10 players. Add the bot to a group and use /newgame."
+msgstr "Resistance: Werewolves is a social deduction game for 5-10 players. Add the bot to a group and use the button below or /newgame."
 
 msgid "help.commands"
 msgstr "Commands: /newgame, /join, /missions, /startgame, /cancelgame, /board, /votes, /calltovote, /stats, /language, /grouplanguage."
@@ -19,6 +19,24 @@ msgstr "Board symbols: ✅ curse lifted, ❌ villagers attacked, ⬜ mission not
 
 msgid "ping"
 msgstr "pong"
+
+msgid "menu.create"
+msgstr "Create game"
+
+msgid "menu.join"
+msgstr "Join game"
+
+msgid "menu.missions.3"
+msgstr "3 missions"
+
+msgid "menu.missions.5"
+msgstr "5 missions"
+
+msgid "menu.start"
+msgstr "Start game"
+
+msgid "menu.cancel"
+msgstr "Cancel game"
 
 msgid "error.unavailable"
 msgstr "This action is no longer available."
