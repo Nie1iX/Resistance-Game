@@ -1,4 +1,4 @@
-# Resistance Telegram Bot
+# Resistance Game Telegram Bot
 
 A Telegram bot for playing social deduction games without a dedicated moderator.
 
