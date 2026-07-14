@@ -10,14 +10,14 @@ from resistance.settings_store import SettingsStore
 def test_translates_game_messages_and_arguments():
     assert Translator("ru").text("lobby.created") == "Новая игра создана!"
     assert Translator("en").text("lobby.joined", name="Ada") == "Ada joined the lobby."
-    assert Translator("ru").text("label.werewolf") == "Оборотень"
+    assert Translator("ru").text("label.werewolves.werewolf") == "Оборотень"
 
 
 def test_falls_back_to_english_for_unknown_language():
     translator = Translator("de")
 
     assert translator.language == "en"
-    assert translator.text("team.confirm") == "Confirm patrol"
+    assert translator.text("team.confirm") == "Confirm team"
 
 
 def test_translates_three_mission_lobby_setting():

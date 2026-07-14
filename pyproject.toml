@@ -1,7 +1,7 @@
 [project]
-name = "resistance-werewolves"
+name = "resistance-game-bot"
 version = "0.1.0"
-description = "Telegram bot for The Resistance in a werewolf theme"
+description = "Telegram bot for classic and werewolf Resistance variants"
 requires-python = ">=3.12"
 dependencies = [
     "aiogram[i18n]>=3,<4",

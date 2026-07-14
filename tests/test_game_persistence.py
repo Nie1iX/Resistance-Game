@@ -1,6 +1,6 @@
 from random import Random
 
-from resistance.domain import JoinResult, Player, StartResult
+from resistance.domain import GameVariant, JoinResult, Player, StartResult
 from resistance.game import Phase
 from resistance.game_persistence import GamePersistence
 from resistance.game_store import CreateResult, GameStore
@@ -35,6 +35,24 @@ def test_restores_selected_mission_count_for_lobby_and_match(tmp_path):
     match = GameStore(Random(99), GamePersistence(database_path)).match(-1)
     assert match is not None
     assert match.mission_count == 3
+
+
+def test_restores_selected_variant_for_lobby_and_match(tmp_path):
+    database_path = tmp_path / "bot.db"
+    store = GameStore(Random(7), GamePersistence(database_path))
+    store.create_lobby(-1, 1)
+    store.set_variant(-1, 1, False, GameVariant.WEREWOLVES)
+    for user_id in range(1, 6):
+        store.join(-1, Player(user_id, str(user_id)))
+
+    lobby = GameStore(Random(99), GamePersistence(database_path)).lobby(-1)
+    assert lobby is not None
+    assert lobby.variant is GameVariant.WEREWOLVES
+
+    store.start(-1, 1, is_admin=False)
+    match = GameStore(Random(99), GamePersistence(database_path)).match(-1)
+    assert match is not None
+    assert match.variant is GameVariant.WEREWOLVES
 
 
 def test_restores_team_selection_and_votes_after_a_process_restart(tmp_path):

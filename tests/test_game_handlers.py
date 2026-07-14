@@ -1,9 +1,11 @@
 from random import Random
 
-from resistance.domain import Lobby, Player
-from resistance.game import Match
+from resistance.domain import GameVariant, Lobby, Player
+from resistance.game import Match, Role
 from resistance.game_handlers import (
     GameCallback,
+    _board,
+    _label,
     _lobby_keyboard,
     _main_menu_keyboard,
     _team_keyboard,
@@ -30,7 +32,7 @@ def test_game_callback_keeps_group_identity_for_private_messages():
     assert GameCallback.unpack(callback.pack()).chat_id == -100
 
 
-def test_patrol_keyboard_marks_selection_and_enables_confirmation_when_full():
+def test_team_keyboard_marks_selection_and_enables_confirmation_when_full():
     match = Match.from_lobby(_lobby(), Random(7))
     match.toggle_team_member(match.leader_id, match.turn_order[0])
     match.toggle_team_member(match.leader_id, match.turn_order[1])
@@ -39,7 +41,7 @@ def test_patrol_keyboard_marks_selection_and_enables_confirmation_when_full():
     labels = [button.text for row in keyboard.inline_keyboard for button in row]
 
     assert sum(label.startswith("✓ ") for label in labels) == 2
-    assert "Confirm patrol" in labels
+    assert "Confirm team" in labels
 
 
 def test_main_menu_opens_lobby_creation():
@@ -59,13 +61,49 @@ def test_lobby_keyboard_covers_setup_without_extra_commands():
     labels = [button.text for button in buttons]
     operations = {GameCallback.unpack(button.callback_data).operation for button in buttons}
 
-    assert labels == ["Join game", "✓ 3 missions", "5 missions", "Start game", "Cancel game"]
+    assert labels == [
+        "Join game",
+        "✓ Classic",
+        "Werewolves",
+        "✓ 3 missions",
+        "5 missions",
+        "Start game",
+        "Cancel game",
+    ]
     assert operations == {
         "lobby_join",
+        "lobby_variant",
         "lobby_missions",
         "lobby_start",
         "lobby_cancel",
     }
+
+
+def test_werewolf_lobby_hides_classic_mission_count_buttons():
+    lobby = _lobby()
+    lobby.variant = GameVariant.WEREWOLVES
+
+    keyboard = _lobby_keyboard(Translator("en"), lobby)
+    buttons = [button for row in keyboard.inline_keyboard for button in row]
+    labels = [button.text for button in buttons]
+    operations = {GameCallback.unpack(button.callback_data).operation for button in buttons}
+
+    assert labels == ["Join game", "Classic", "✓ Werewolves", "Start game", "Cancel game"]
+    assert "lobby_missions" not in operations
+
+
+def test_variant_controls_role_labels_and_board_summary():
+    translator = Translator("en")
+    match = Match.from_lobby(_lobby(), Random(7))
+
+    assert _label(translator, GameVariant.CLASSIC, Role.VILLAGER) == "Resistance member"
+    assert _label(translator, GameVariant.CLASSIC, Role.WEREWOLF) == "Spy"
+
+    match.variant = GameVariant.WEREWOLVES
+    assert _label(translator, match.variant, Role.VILLAGER) == "Villager"
+    assert _label(translator, match.variant, Role.WEREWOLF) == "Werewolf"
+    assert "Curses remaining: 3" in _board(translator, match)
+    assert "Village health: 3" in _board(translator, match)
 
 
 def test_game_router_registers_lobby_button_actions(tmp_path):
@@ -79,6 +117,7 @@ def test_game_router_registers_lobby_button_actions(tmp_path):
     assert {
         "lobby_create",
         "lobby_join",
+        "lobby_variant",
         "lobby_missions",
         "lobby_start",
         "lobby_cancel",

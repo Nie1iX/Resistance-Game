@@ -4,7 +4,15 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from random import Random
 
-from resistance.domain import JoinResult, Lobby, MissionCountResult, Player, StartResult
+from resistance.domain import (
+    GameVariant,
+    JoinResult,
+    Lobby,
+    MissionCountResult,
+    Player,
+    StartResult,
+    VariantResult,
+)
 from resistance.game import Match
 from resistance.game_persistence import GamePersistence
 
@@ -70,6 +78,25 @@ class GameStore:
             )
         result = lobby.set_mission_count(actor_id, is_admin, mission_count)
         if result is MissionCountResult.UPDATED:
+            self._save_lobby(chat_id)
+        return result
+
+    def set_variant(
+        self,
+        chat_id: int,
+        actor_id: int,
+        is_admin: bool,
+        variant: GameVariant,
+    ) -> VariantResult:
+        lobby = self.lobby(chat_id)
+        if lobby is None:
+            return (
+                VariantResult.STARTED
+                if self.match(chat_id) is not None
+                else VariantResult.MISSING
+            )
+        result = lobby.set_variant(actor_id, is_admin, variant)
+        if result is VariantResult.UPDATED:
             self._save_lobby(chat_id)
         return result
 

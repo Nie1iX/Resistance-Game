@@ -8,7 +8,15 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message, User
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from resistance.domain import JoinResult, Lobby, MissionCountResult, Player, StartResult
+from resistance.domain import (
+    GameVariant,
+    JoinResult,
+    Lobby,
+    MissionCountResult,
+    Player,
+    StartResult,
+    VariantResult,
+)
 from resistance.game import GamePlayer, Match, MissionResult, Phase, Role, TeamVoteResult
 from resistance.game_store import CreateResult, GameStore
 from resistance.i18n import DEFAULT_LANGUAGE, Translator
@@ -131,6 +139,38 @@ def create_game_router(
         )
         lobby = games.lobby(message.chat.id)
         if result is MissionCountResult.UPDATED and lobby is not None:
+            await bot.edit_message_reply_markup(
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                reply_markup=_lobby_keyboard(
+                    _group_translator(settings, message.chat.id), lobby
+                ),
+            )
+
+    @router.callback_query(GameCallback.filter(F.operation == "lobby_variant"))
+    async def lobby_variant(
+        callback: CallbackQuery, callback_data: GameCallback, bot: Bot
+    ) -> None:
+        message = _group_callback_message(callback, callback_data)
+        try:
+            variant = GameVariant(callback_data.value)
+        except ValueError:
+            await callback.answer()
+            return
+        if message is None:
+            await callback.answer()
+            return
+        await callback.answer()
+        result = await _set_lobby_variant(
+            bot,
+            games,
+            settings,
+            message.chat.id,
+            callback.from_user,
+            variant,
+        )
+        lobby = games.lobby(message.chat.id)
+        if result is VariantResult.UPDATED and lobby is not None:
             await bot.edit_message_reply_markup(
                 chat_id=message.chat.id,
                 message_id=message.message_id,
@@ -295,7 +335,8 @@ def create_game_router(
         if result is MissionResult.PENDING:
             return
         translator = _group_translator(settings, match.chat_id)
-        key = "mission.result.success" if result is MissionResult.SUCCESS else "mission.result.failed"
+        outcome = "success" if result is MissionResult.SUCCESS else "failed"
+        key = f"mission.result.{match.variant.value}.{outcome}"
         await bot.send_message(
             match.chat_id, translator.text(key, sabotages=match.last_sabotages)
         )
@@ -387,6 +428,37 @@ async def _set_lobby_missions(
     return result
 
 
+async def _set_lobby_variant(
+    bot: Bot,
+    games: GameStore,
+    settings: SettingsStore,
+    chat_id: int,
+    user: User,
+    variant: GameVariant,
+) -> VariantResult:
+    result = games.set_variant(
+        chat_id,
+        user.id,
+        await _is_group_admin(bot, chat_id, user.id),
+        variant,
+    )
+    key = {
+        VariantResult.UPDATED: "variant.updated",
+        VariantResult.UNAUTHORIZED: "lobby.start_forbidden",
+        VariantResult.STARTED: "lobby.started",
+        VariantResult.MISSING: "lobby.missing",
+    }[result]
+    translator = _group_translator(settings, chat_id)
+    await bot.send_message(
+        chat_id,
+        translator.text(
+            key,
+            variant=translator.text(f"variant.{variant.value}"),
+        ),
+    )
+    return result
+
+
 async def _cancel_lobby(
     bot: Bot, games: GameStore, settings: SettingsStore, chat_id: int, user: User
 ) -> None:
@@ -413,7 +485,7 @@ async def _advance(bot: Bot, settings: SettingsStore, match: Match) -> None:
         await bot.send_message(
             match.chat_id,
             group_translator.text(
-                "round.build",
+                f"round.build.{match.variant.value}",
                 mission=match.mission_index + 1,
                 total=match.mission_count,
                 leader=leader.name,
@@ -475,16 +547,27 @@ def _lobby_keyboard(translator: Translator, lobby: Lobby) -> InlineKeyboardMarku
             chat_id=lobby.chat_id, operation="lobby_join", value="go"
         ),
     )
-    for mission_count in (3, 5):
-        selected = "✓ " if lobby.mission_count == mission_count else ""
+    for variant in GameVariant:
+        selected = "✓ " if lobby.variant is variant else ""
         builder.button(
-            text=f"{selected}{translator.text(f'menu.missions.{mission_count}')}",
+            text=f"{selected}{translator.text(f'menu.variant.{variant.value}')}",
             callback_data=GameCallback(
                 chat_id=lobby.chat_id,
-                operation="lobby_missions",
-                value=str(mission_count),
+                operation="lobby_variant",
+                value=variant.value,
             ),
         )
+    if lobby.variant is GameVariant.CLASSIC:
+        for mission_count in (3, 5):
+            selected = "✓ " if lobby.mission_count == mission_count else ""
+            builder.button(
+                text=f"{selected}{translator.text(f'menu.missions.{mission_count}')}",
+                callback_data=GameCallback(
+                    chat_id=lobby.chat_id,
+                    operation="lobby_missions",
+                    value=str(mission_count),
+                ),
+            )
     builder.button(
         text=translator.text("menu.start"),
         callback_data=GameCallback(
@@ -497,7 +580,7 @@ def _lobby_keyboard(translator: Translator, lobby: Lobby) -> InlineKeyboardMarku
             chat_id=lobby.chat_id, operation="lobby_cancel", value="go"
         ),
     )
-    builder.adjust(1, 2, 2)
+    builder.adjust(1, 2, 2, 2)
     return builder.as_markup()
 
 
@@ -541,14 +624,14 @@ def _mission_keyboard(
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
-        text=translator.text("mission.success"),
+        text=translator.text(f"mission.success.{match.variant.value}"),
         callback_data=GameCallback(
             chat_id=match.chat_id, operation="mission_vote", value="success"
         ),
     )
     if player.role is Role.WEREWOLF:
         builder.button(
-            text=translator.text("mission.sabotage"),
+            text=translator.text(f"mission.sabotage.{match.variant.value}"),
             callback_data=GameCallback(
                 chat_id=match.chat_id, operation="mission_vote", value="sabotage"
             ),
@@ -562,13 +645,18 @@ async def _inform_roles(bot: Bot, settings: SettingsStore, match: Match) -> None
     for player in match.players.values():
         translator = _player_translator(settings, player)
         await bot.send_message(
-            player.user_id, translator.text("game.role", role=_label(translator, player.role))
+            player.user_id,
+            translator.text(
+                "game.role",
+                role=_label(translator, match.variant, player.role),
+            ),
         )
         if player.role is Role.WEREWOLF:
             await bot.send_message(
                 player.user_id,
                 translator.text(
-                    "game.werewolves", names=", ".join(werewolf.name for werewolf in werewolves)
+                    f"game.hidden_players.{match.variant.value}",
+                    names=", ".join(werewolf.name for werewolf in werewolves),
                 ),
             )
 
@@ -584,12 +672,20 @@ async def _finish(
     translator = _group_translator(settings, match.chat_id)
     assert match.winner is not None
     roles = "\n".join(
-        translator.text("roles", name=player.name, role=_label(translator, player.role))
+        translator.text(
+            "roles",
+            name=player.name,
+            role=_label(translator, match.variant, player.role),
+        )
         for player in match.players.values()
     )
     await bot.send_message(
         match.chat_id,
-        translator.text("game.over", winner=_label(translator, match.winner), roles=roles),
+        translator.text(
+            "game.over",
+            winner=_label(translator, match.variant, match.winner),
+            roles=roles,
+        ),
     )
     games.cancel(match.chat_id)
 
@@ -601,13 +697,29 @@ def _team_vote_summary(
     translator = _group_translator(settings, match.chat_id)
     approved = _names(match, [user_id for user_id, vote in match.team_votes.items() if vote]) or "—"
     rejected = _names(match, [user_id for user_id, vote in match.team_votes.items() if not vote]) or "—"
-    key = "team.vote.approved" if result is TeamVoteResult.APPROVED else "team.vote.rejected"
+    key = (
+        "team.vote.approved"
+        if result is TeamVoteResult.APPROVED
+        else f"team.vote.rejected.{match.variant.value}"
+    )
     return translator.text(
         key, approved=approved, rejected=rejected, attempts=match.rejected_teams
     )
 
 
 def _board(translator: Translator, match: Match) -> str:
+    if match.variant is GameVariant.WEREWOLVES:
+        return translator.text(
+            "board.werewolves",
+            curses=3 - match.successful_missions,
+            health=3 - match.failed_missions,
+            rejected=match.rejected_teams,
+            round=match.mission_index + 1,
+            size=match.required_team_size,
+            order=" → ".join(
+                match.players[user_id].name for user_id in match.turn_order
+            ),
+        )
     markers = {
         MissionResult.SUCCESS: "✅",
         MissionResult.FAILED: "❌",
@@ -617,7 +729,7 @@ def _board(translator: Translator, match: Match) -> str:
         + ["⬜"] * (match.mission_count - len(match.mission_results))
     )
     return translator.text(
-        "board",
+        "board.classic",
         missions=missions,
         successes=match.successful_missions,
         failures=match.failed_missions,
@@ -694,8 +806,8 @@ def _player_translator(settings: SettingsStore, player: GamePlayer) -> Translato
     return Translator(settings.user_language(player.user_id) or DEFAULT_LANGUAGE)
 
 
-def _label(translator: Translator, role: Role) -> str:
-    return translator.text(f"label.{role.value}")
+def _label(translator: Translator, variant: GameVariant, role: Role) -> str:
+    return translator.text(f"label.{variant.value}.{role.value}")
 
 
 async def _is_group_admin(bot: Bot, chat_id: int, user_id: int) -> bool:

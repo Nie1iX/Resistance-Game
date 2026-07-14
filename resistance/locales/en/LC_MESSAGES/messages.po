@@ -1,21 +1,22 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Resistance Werewolves\n"
+"Project-Id-Version: Resistance Game Bot\n"
+"POT-Creation-Date: 2026-07-14 00:00+0000\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "start.description"
-msgstr "Resistance: Werewolves is a social deduction game for 5-10 players. Add the bot to a group and use the button below or /newgame."
+msgstr "Resistance is a social deduction game for 5-10 players. Add the bot to a group and use the button below or /newgame."
 
 msgid "help.commands"
 msgstr "Commands: /newgame, /join, /missions, /startgame, /cancelgame, /board, /votes, /calltovote, /stats, /language, /grouplanguage."
 
 msgid "rules.link"
-msgstr "Rules: https://boardgamer.ru/pravila-igry-resistance/"
+msgstr "Rules: Classic — https://tesera.ru/images/items/104070/Resistance_V2_rules.pdf; Werewolves — https://boardgamer.ru/pravila-igry-resistance/"
 
 msgid "symbols.text"
-msgstr "Board symbols: ✅ curse lifted, ❌ villagers attacked, ⬜ mission not played."
+msgstr "Board symbols: ✅ successful mission, ❌ failed mission, ⬜ mission not played."
 
 msgid "ping"
 msgstr "pong"
@@ -25,6 +26,12 @@ msgstr "Create game"
 
 msgid "menu.join"
 msgstr "Join game"
+
+msgid "menu.variant.classic"
+msgstr "Classic"
+
+msgid "menu.variant.werewolves"
+msgstr "Werewolves"
 
 msgid "menu.missions.3"
 msgstr "3 missions"
@@ -60,10 +67,10 @@ msgid "lobby.already_joined"
 msgstr "You are already in the lobby."
 
 msgid "lobby.full"
-msgstr "The lobby is full. Start the game with /startgame."
+msgstr "The lobby is full. Start the game from the lobby panel."
 
 msgid "lobby.missing"
-msgstr "There is no lobby in this group. Create one with /newgame."
+msgstr "There is no lobby in this group. Create one with the button or /newgame."
 
 msgid "lobby.started"
 msgstr "The game has already started."
@@ -72,13 +79,22 @@ msgid "lobby.need_players"
 msgstr "The lobby needs 5-10 players before it can start."
 
 msgid "lobby.start_forbidden"
-msgstr "Only the lobby creator or a group administrator can start or cancel the game."
+msgstr "Only the lobby creator or a group administrator can change settings, start, or cancel the game."
 
 msgid "missions.usage"
-msgstr "Choose the game length before starting: /missions 3 or /missions 5."
+msgstr "Classic rules only: choose /missions 3 or /missions 5 before starting."
 
 msgid "missions.updated"
 msgstr "Mission count: {count}."
+
+msgid "variant.classic"
+msgstr "Classic"
+
+msgid "variant.werewolves"
+msgstr "Werewolves"
+
+msgid "variant.updated"
+msgstr "Game variant: {variant}."
 
 msgid "game.started"
 msgstr "The game has started with {players} players. Check your private chat for your secret role."
@@ -89,23 +105,29 @@ msgstr "Game cancelled."
 msgid "game.role"
 msgstr "Your secret role is {role}."
 
-msgid "game.werewolves"
+msgid "game.hidden_players.classic"
+msgstr "The spies are: {names}."
+
+msgid "game.hidden_players.werewolves"
 msgstr "The werewolves are: {names}."
 
-msgid "round.build"
-msgstr "Mission {mission}/{total}. Sheriff: {leader}. Choose {size} players for the patrol."
+msgid "round.build.classic"
+msgstr "Mission {mission}/{total}. Leader: {leader}. Choose {size} players for the team."
+
+msgid "round.build.werewolves"
+msgstr "Round {mission}. Leader: {leader}. Choose {size} players for the patrol."
 
 msgid "team.choose"
-msgstr "Choose exactly {size} patrol members."
+msgstr "Choose exactly {size} team members."
 
 msgid "team.confirm"
-msgstr "Confirm patrol"
+msgstr "Confirm team"
 
 msgid "team.proposed"
-msgstr "Sheriff {leader} proposed this patrol: {members}. Vote in private chat."
+msgstr "Leader {leader} proposed this team: {members}. Vote in private chat."
 
 msgid "team.vote.prompt"
-msgstr "Approve the patrol: {members}?"
+msgstr "Approve the team: {members}?"
 
 msgid "team.vote.yes"
 msgstr "Approve"
@@ -114,28 +136,43 @@ msgid "team.vote.no"
 msgstr "Reject"
 
 msgid "team.vote.approved"
-msgstr "Patrol approved.\nApprove: {approved}\nReject: {rejected}"
+msgstr "Team approved.\nApprove: {approved}\nReject: {rejected}"
 
-msgid "team.vote.rejected"
-msgstr "Patrol rejected ({attempts}/5).\nApprove: {approved}\nReject: {rejected}"
+msgid "team.vote.rejected.classic"
+msgstr "Team rejected ({attempts}/5).\nApprove: {approved}\nReject: {rejected}"
+
+msgid "team.vote.rejected.werewolves"
+msgstr "Team rejected ({attempts} this round).\nApprove: {approved}\nReject: {rejected}"
 
 msgid "mission.departed"
-msgstr "The patrol departs: {members}. Its decision is secret."
+msgstr "The team departs: {members}. Its decision is secret."
 
 msgid "mission.prompt"
-msgstr "Choose the patrol outcome."
+msgstr "Choose the mission outcome."
 
-msgid "mission.success"
+msgid "mission.success.classic"
+msgstr "Support the mission"
+
+msgid "mission.sabotage.classic"
+msgstr "Sabotage the mission"
+
+msgid "mission.success.werewolves"
 msgstr "Protect the village"
 
-msgid "mission.sabotage"
+msgid "mission.sabotage.werewolves"
 msgstr "Attack the villagers"
 
-msgid "mission.result.success"
-msgstr "The patrol succeeded: a curse is lifted. Sabotages: {sabotages}."
+msgid "mission.result.classic.success"
+msgstr "The mission succeeded. Sabotages: {sabotages}."
 
-msgid "mission.result.failed"
-msgstr "The patrol failed: the werewolves attacked. Sabotages: {sabotages}."
+msgid "mission.result.classic.failed"
+msgstr "The mission failed. Sabotages: {sabotages}."
+
+msgid "mission.result.werewolves.success"
+msgstr "The patrol succeeded: a curse is lifted. Attacks: {sabotages}."
+
+msgid "mission.result.werewolves.failed"
+msgstr "The patrol failed: the werewolves attacked. Attacks: {sabotages}."
 
 msgid "game.over"
 msgstr "Game over: {winner} win.\n\n{roles}"
@@ -143,8 +180,11 @@ msgstr "Game over: {winner} win.\n\n{roles}"
 msgid "roles"
 msgstr "{name}: {role}"
 
-msgid "board"
-msgstr "Missions: {missions}\nVillagers: {successes}/{wins}\nWerewolves: {failures}/{wins}\nRejected patrols: {rejected}/5\nCurrent mission: {mission}/{total} ({size} players)\nSheriff order: {order}"
+msgid "board.classic"
+msgstr "Missions: {missions}\nResistance: {successes}/{wins}\nSpies: {failures}/{wins}\nRejected teams: {rejected}/5\nCurrent mission: {mission}/{total} ({size} players)\nLeader order: {order}"
+
+msgid "board.werewolves"
+msgstr "Curses remaining: {curses}\nVillage health: {health}\nRejected teams this round: {rejected}\nCurrent round: {round} ({size} players)\nLeader order: {order}"
 
 msgid "stats.votes"
 msgstr "Votes received: {count}/{total}."
@@ -156,7 +196,7 @@ msgid "stats.reminder"
 msgstr "Please vote: {players}"
 
 msgid "stats.summary"
-msgstr "Your games: {games}\nWins: {wins}\n\nGroup games: {group_games}\nVillager wins: {villager_wins}\nWerewolf wins: {werewolf_wins}"
+msgstr "Your games: {games}\nWins: {wins}\n\nGroup games: {group_games}\nGood-side wins: {villager_wins}\nHidden-side wins: {werewolf_wins}"
 
 msgid "language.choose"
 msgstr "Choose a language:"
@@ -170,8 +210,14 @@ msgstr "Group language: {language}."
 msgid "language.admin_only"
 msgstr "Only group administrators can change the group language."
 
-msgid "label.villager"
+msgid "label.classic.villager"
+msgstr "Resistance member"
+
+msgid "label.classic.werewolf"
+msgstr "Spy"
+
+msgid "label.werewolves.villager"
 msgstr "Villager"
 
-msgid "label.werewolf"
+msgid "label.werewolves.werewolf"
 msgstr "Werewolf"

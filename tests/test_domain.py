@@ -1,4 +1,12 @@
-from resistance.domain import JoinResult, Lobby, MissionCountResult, Player, StartResult
+from resistance.domain import (
+    GameVariant,
+    JoinResult,
+    Lobby,
+    MissionCountResult,
+    Player,
+    StartResult,
+    VariantResult,
+)
 
 
 def test_lobby_accepts_between_five_and_ten_unique_players():
@@ -30,6 +38,29 @@ def test_lobby_creator_can_choose_three_or_five_missions_before_start():
     assert lobby.mission_count == 3
     assert lobby.set_mission_count(2, is_admin=False, mission_count=5) is MissionCountResult.UNAUTHORIZED
     assert lobby.set_mission_count(1, is_admin=False, mission_count=4) is MissionCountResult.INVALID
+
+
+def test_lobby_creator_or_admin_can_choose_the_game_variant_before_start():
+    lobby = Lobby(chat_id=-1, initiator_id=1)
+
+    assert lobby.variant is GameVariant.CLASSIC
+    assert lobby.set_variant(2, is_admin=False, variant=GameVariant.WEREWOLVES) is VariantResult.UNAUTHORIZED
+    assert lobby.set_variant(2, is_admin=True, variant=GameVariant.WEREWOLVES) is VariantResult.UPDATED
+    assert lobby.variant is GameVariant.WEREWOLVES
+
+
+def test_werewolf_variant_does_not_accept_classic_mission_count_settings():
+    lobby = Lobby(
+        chat_id=-1,
+        initiator_id=1,
+        variant=GameVariant.WEREWOLVES,
+    )
+
+    assert (
+        lobby.set_mission_count(1, is_admin=False, mission_count=3)
+        is MissionCountResult.INVALID
+    )
+    assert lobby.mission_count == 5
 
 
 def _lobby(players: int) -> Lobby:

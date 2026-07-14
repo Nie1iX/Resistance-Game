@@ -1,11 +1,11 @@
-"""Rules engine for the base Resistance game in a werewolf theme."""
+"""Rules engine for the supported Resistance game variants."""
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from random import Random
 from uuid import uuid4
 
-from resistance.domain import Lobby
+from resistance.domain import GameVariant, Lobby
 
 
 class Role(str, Enum):
@@ -32,13 +32,18 @@ class MissionResult(str, Enum):
     FAILED = "failed"
 
 
-_ROLE_SETS: dict[int, tuple[Role, ...]] = {
+_CLASSIC_ROLE_SETS: dict[int, tuple[Role, ...]] = {
     5: (Role.VILLAGER,) * 3 + (Role.WEREWOLF,) * 2,
     6: (Role.VILLAGER,) * 4 + (Role.WEREWOLF,) * 2,
     7: (Role.VILLAGER,) * 4 + (Role.WEREWOLF,) * 3,
     8: (Role.VILLAGER,) * 5 + (Role.WEREWOLF,) * 3,
     9: (Role.VILLAGER,) * 6 + (Role.WEREWOLF,) * 3,
     10: (Role.VILLAGER,) * 6 + (Role.WEREWOLF,) * 4,
+}
+
+_WEREWOLF_ROLE_SETS = {
+    **_CLASSIC_ROLE_SETS,
+    9: (Role.VILLAGER,) * 5 + (Role.WEREWOLF,) * 4,
 }
 
 _TEAM_SIZES: dict[int, tuple[int, ...]] = {
@@ -65,6 +70,7 @@ class Match:
     players: dict[int, GamePlayer]
     turn_order: list[int]
     phase: Phase
+    variant: GameVariant = GameVariant.CLASSIC
     mission_count: int = 5
     match_id: str = field(default_factory=lambda: uuid4().hex)
     leader_index: int = 0
@@ -82,7 +88,12 @@ class Match:
 
     @classmethod
     def from_lobby(cls, lobby: Lobby, random: Random) -> "Match":
-        roles = list(_ROLE_SETS[len(lobby.players)])
+        role_sets = (
+            _CLASSIC_ROLE_SETS
+            if lobby.variant is GameVariant.CLASSIC
+            else _WEREWOLF_ROLE_SETS
+        )
+        roles = list(role_sets[len(lobby.players)])
         random.shuffle(roles)
         players = {
             user_id: GamePlayer(user_id, player.name, roles.pop())
@@ -96,6 +107,7 @@ class Match:
             players=players,
             turn_order=turn_order,
             phase=Phase.BUILD_TEAM,
+            variant=lobby.variant,
             mission_count=lobby.mission_count,
         )
 
@@ -105,37 +117,49 @@ class Match:
 
     @property
     def team_sizes(self) -> tuple[int, ...]:
+        if self.variant is GameVariant.WEREWOLVES:
+            if len(self.players) == 5:
+                return (2, 3, 3)
+            if len(self.players) <= 7:
+                return (2, 3, 4)
+            return (3, 4, 5)
         return _TEAM_SIZES[len(self.players)]
 
     @property
     def required_team_size(self) -> int:
+        if self.variant is GameVariant.WEREWOLVES:
+            return self.team_sizes[min(self.successful_missions, 2)]
         return self.team_sizes[self.mission_index]
 
     @property
     def required_sabotages(self) -> int:
+        if self.variant is GameVariant.WEREWOLVES:
+            return 1
         return 2 if len(self.players) >= 7 and self.mission_index == 3 else 1
 
     @property
     def wins_required(self) -> int:
+        if self.variant is GameVariant.WEREWOLVES:
+            return 3
         return self.mission_count // 2 + 1
 
     def toggle_team_member(self, actor_id: int, candidate_id: int) -> None:
         if self.phase is not Phase.BUILD_TEAM or actor_id != self.leader_id:
-            raise ValueError("Only the current Sheriff can build a patrol")
+            raise ValueError("Only the current leader can build a team")
         if candidate_id not in self.players:
-            raise ValueError("Unknown patrol member")
+            raise ValueError("Unknown team member")
         if candidate_id in self.selected_team:
             self.selected_team.remove(candidate_id)
             return
         if len(self.selected_team) == self.required_team_size:
-            raise ValueError("The patrol already has the required number of members")
+            raise ValueError("The team already has the required number of members")
         self.selected_team.append(candidate_id)
 
     def propose_team(self, actor_id: int) -> None:
         if self.phase is not Phase.BUILD_TEAM or actor_id != self.leader_id:
-            raise ValueError("Only the current Sheriff can propose a patrol")
+            raise ValueError("Only the current leader can propose a team")
         if len(self.selected_team) != self.required_team_size:
-            raise ValueError(f"Select exactly {self.required_team_size} patrol members")
+            raise ValueError(f"Select exactly {self.required_team_size} team members")
         self.proposed_team = list(self.selected_team)
         self.team_votes = {}
         self.phase = Phase.TEAM_VOTE
@@ -154,7 +178,7 @@ class Match:
             self.phase = Phase.MISSION
             return TeamVoteResult.APPROVED
         self.rejected_teams += 1
-        if self.rejected_teams == 5:
+        if self.variant is GameVariant.CLASSIC and self.rejected_teams == 5:
             self.winner = Role.WEREWOLF
             self.phase = Phase.FINISHED
         else:
@@ -166,7 +190,7 @@ class Match:
 
     def vote_mission(self, actor_id: int, success: bool) -> MissionResult:
         if self.phase is not Phase.MISSION or self.proposed_team is None or actor_id not in self.proposed_team:
-            raise ValueError("This player is not on the current patrol")
+            raise ValueError("This player is not on the current team")
         if not success and self.players[actor_id].role is Role.VILLAGER:
             raise ValueError("Villagers cannot sabotage a patrol")
         assert self.mission_votes is not None

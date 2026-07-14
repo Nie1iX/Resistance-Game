@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from resistance.domain import Lobby, Player
+from resistance.domain import GameVariant, Lobby, Player
 from resistance.game import GamePlayer, Match, MissionResult, Phase, Role
 
 
@@ -61,6 +61,7 @@ def _lobby_to_state(lobby: Lobby) -> dict[str, Any]:
         "chat_id": lobby.chat_id,
         "initiator_id": lobby.initiator_id,
         "mission_count": lobby.mission_count,
+        "variant": lobby.variant.value,
         "players": [{"user_id": player.user_id, "name": player.name} for player in lobby.players.values()],
         "started": lobby.started,
     }
@@ -75,6 +76,7 @@ def _lobby_from_state(state: dict[str, Any]) -> Lobby:
         chat_id=int(state["chat_id"]),
         initiator_id=int(state["initiator_id"]),
         mission_count=int(state.get("mission_count", 5)),
+        variant=GameVariant(str(state.get("variant", GameVariant.CLASSIC.value))),
         players=players,
         started=bool(state["started"]),
     )
@@ -91,6 +93,7 @@ def _match_to_state(match: Match) -> dict[str, Any]:
         ],
         "turn_order": match.turn_order,
         "phase": match.phase.name,
+        "variant": match.variant.value,
         "mission_count": match.mission_count,
         "leader_index": match.leader_index,
         "mission_index": match.mission_index,
@@ -120,6 +123,7 @@ def _match_from_state(state: dict[str, Any]) -> Match:
         players=players,
         turn_order=[int(user_id) for user_id in state["turn_order"]],
         phase=Phase[str(state["phase"])],
+        variant=GameVariant(str(state.get("variant", GameVariant.CLASSIC.value))),
         mission_count=int(state.get("mission_count", 5)),
         match_id=str(state["match_id"]),
         leader_index=int(state["leader_index"]),

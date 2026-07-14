@@ -31,6 +31,18 @@ class MissionCountResult(Enum):
     MISSING = auto()
 
 
+class GameVariant(str, Enum):
+    CLASSIC = "classic"
+    WEREWOLVES = "werewolves"
+
+
+class VariantResult(Enum):
+    UPDATED = auto()
+    UNAUTHORIZED = auto()
+    STARTED = auto()
+    MISSING = auto()
+
+
 @dataclass(frozen=True)
 class Player:
     user_id: int
@@ -42,6 +54,7 @@ class Lobby:
     chat_id: int
     initiator_id: int
     mission_count: int = 5
+    variant: GameVariant = GameVariant.CLASSIC
     players: dict[int, Player] = field(default_factory=dict)
     started: bool = False
 
@@ -74,7 +87,17 @@ class Lobby:
             return MissionCountResult.STARTED
         if actor_id != self.initiator_id and not is_admin:
             return MissionCountResult.UNAUTHORIZED
-        if mission_count not in {3, 5}:
+        if self.variant is not GameVariant.CLASSIC or mission_count not in {3, 5}:
             return MissionCountResult.INVALID
         self.mission_count = mission_count
         return MissionCountResult.UPDATED
+
+    def set_variant(
+        self, actor_id: int, is_admin: bool, variant: GameVariant
+    ) -> VariantResult:
+        if self.started:
+            return VariantResult.STARTED
+        if actor_id != self.initiator_id and not is_admin:
+            return VariantResult.UNAUTHORIZED
+        self.variant = variant
+        return VariantResult.UPDATED

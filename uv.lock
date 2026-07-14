@@ -813,7 +813,7 @@ wheels = [
 ]
 
 [[package]]
-name = "resistance-werewolves"
+name = "resistance-game-bot"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

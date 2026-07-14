@@ -1,21 +1,22 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Resistance Werewolves\n"
+"Project-Id-Version: Resistance Game Bot\n"
+"POT-Creation-Date: 2026-07-14 00:00+0000\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "start.description"
-msgstr "«Сопротивление: Оборотни» — игра на социальную дедукцию для 5–10 игроков. Добавьте бота в группу и используйте кнопку ниже или /newgame."
+msgstr "«Сопротивление» — игра на социальную дедукцию для 5–10 игроков. Добавьте бота в группу и используйте кнопку ниже или /newgame."
 
 msgid "help.commands"
 msgstr "Команды: /newgame, /join, /missions, /startgame, /cancelgame, /board, /votes, /calltovote, /stats, /language, /grouplanguage."
 
 msgid "rules.link"
-msgstr "Правила: https://boardgamer.ru/pravila-igry-resistance/"
+msgstr "Правила: Classic — https://tesera.ru/images/items/104070/Resistance_V2_rules.pdf; Werewolves — https://boardgamer.ru/pravila-igry-resistance/"
 
 msgid "symbols.text"
-msgstr "Символы: ✅ проклятие снято, ❌ жители атакованы, ⬜ миссия ещё не сыграна."
+msgstr "Символы: ✅ успешная миссия, ❌ проваленная миссия, ⬜ миссия ещё не сыграна."
 
 msgid "ping"
 msgstr "pong"
@@ -25,6 +26,12 @@ msgstr "Создать игру"
 
 msgid "menu.join"
 msgstr "Присоединиться"
+
+msgid "menu.variant.classic"
+msgstr "Classic"
+
+msgid "menu.variant.werewolves"
+msgstr "Werewolves"
 
 msgid "menu.missions.3"
 msgstr "3 миссии"
@@ -60,10 +67,10 @@ msgid "lobby.already_joined"
 msgstr "Вы уже в лобби."
 
 msgid "lobby.full"
-msgstr "Лобби заполнено. Запустите игру командой /startgame."
+msgstr "Лобби заполнено. Запустите игру из панели лобби."
 
 msgid "lobby.missing"
-msgstr "В этой группе нет лобби. Создайте его командой /newgame."
+msgstr "В этой группе нет лобби. Создайте его кнопкой или командой /newgame."
 
 msgid "lobby.started"
 msgstr "Игра уже началась."
@@ -72,13 +79,22 @@ msgid "lobby.need_players"
 msgstr "Для запуска в лобби должно быть 5–10 игроков."
 
 msgid "lobby.start_forbidden"
-msgstr "Запустить или отменить игру может только создатель лобби или администратор группы."
+msgstr "Менять настройки, запускать или отменять игру может только создатель лобби или администратор группы."
 
 msgid "missions.usage"
-msgstr "До старта выберите длину игры: /missions 3 или /missions 5."
+msgstr "Только для Classic: до старта выберите /missions 3 или /missions 5."
 
 msgid "missions.updated"
 msgstr "Количество миссий: {count}."
+
+msgid "variant.classic"
+msgstr "Classic"
+
+msgid "variant.werewolves"
+msgstr "Werewolves"
+
+msgid "variant.updated"
+msgstr "Вариант игры: {variant}."
 
 msgid "game.started"
 msgstr "Игра началась: игроков — {players}. Проверьте личные сообщения, чтобы узнать секретную роль."
@@ -89,23 +105,29 @@ msgstr "Игра отменена."
 msgid "game.role"
 msgstr "Ваша секретная роль — {role}."
 
-msgid "game.werewolves"
+msgid "game.hidden_players.classic"
+msgstr "Шпионы: {names}."
+
+msgid "game.hidden_players.werewolves"
 msgstr "Оборотни: {names}."
 
-msgid "round.build"
-msgstr "Миссия {mission}/{total}. Шериф — {leader}. Выберите {size} игроков в дозор."
+msgid "round.build.classic"
+msgstr "Миссия {mission}/{total}. Лидер — {leader}. Выберите {size} игроков в команду."
+
+msgid "round.build.werewolves"
+msgstr "Раунд {mission}. Лидер — {leader}. Выберите {size} игроков в дозор."
 
 msgid "team.choose"
-msgstr "Выберите ровно {size} дозорных."
+msgstr "Выберите ровно {size} участников команды."
 
 msgid "team.confirm"
-msgstr "Подтвердить дозор"
+msgstr "Подтвердить команду"
 
 msgid "team.proposed"
-msgstr "Шериф {leader} предложил дозор: {members}. Голосуйте в личном чате."
+msgstr "Лидер {leader} предложил команду: {members}. Голосуйте в личном чате."
 
 msgid "team.vote.prompt"
-msgstr "Одобрить дозор: {members}?"
+msgstr "Одобрить команду: {members}?"
 
 msgid "team.vote.yes"
 msgstr "Одобрить"
@@ -114,27 +136,42 @@ msgid "team.vote.no"
 msgstr "Отклонить"
 
 msgid "team.vote.approved"
-msgstr "Дозор одобрен.\nЗа: {approved}\nПротив: {rejected}"
+msgstr "Команда одобрена.\nЗа: {approved}\nПротив: {rejected}"
 
-msgid "team.vote.rejected"
-msgstr "Дозор отклонён ({attempts}/5).\nЗа: {approved}\nПротив: {rejected}"
+msgid "team.vote.rejected.classic"
+msgstr "Команда отклонена ({attempts}/5).\nЗа: {approved}\nПротив: {rejected}"
+
+msgid "team.vote.rejected.werewolves"
+msgstr "Команда отклонена ({attempts} в этом раунде).\nЗа: {approved}\nПротив: {rejected}"
 
 msgid "mission.departed"
-msgstr "В дозор отправляются: {members}. Их решение останется тайным."
+msgstr "Команда отправляется на задание: {members}. Её решение останется тайным."
 
 msgid "mission.prompt"
-msgstr "Выберите исход дозора."
+msgstr "Выберите исход миссии."
 
-msgid "mission.success"
+msgid "mission.success.classic"
+msgstr "Поддержать миссию"
+
+msgid "mission.sabotage.classic"
+msgstr "Саботировать миссию"
+
+msgid "mission.success.werewolves"
 msgstr "Защитить деревню"
 
-msgid "mission.sabotage"
+msgid "mission.sabotage.werewolves"
 msgstr "Напасть на жителей"
 
-msgid "mission.result.success"
+msgid "mission.result.classic.success"
+msgstr "Миссия успешна. Голосов за саботаж: {sabotages}."
+
+msgid "mission.result.classic.failed"
+msgstr "Миссия провалена. Голосов за саботаж: {sabotages}."
+
+msgid "mission.result.werewolves.success"
 msgstr "Дозор успешен: одно проклятие снято. Следов нападения: {sabotages}."
 
-msgid "mission.result.failed"
+msgid "mission.result.werewolves.failed"
 msgstr "Дозор провален: оборотни напали. Следов нападения: {sabotages}."
 
 msgid "game.over"
@@ -143,8 +180,11 @@ msgstr "Игра окончена: победили {winner}.\n\n{roles}"
 msgid "roles"
 msgstr "{name}: {role}"
 
-msgid "board"
-msgstr "Миссии: {missions}\nЖители: {successes}/{wins}\nОборотни: {failures}/{wins}\nОтклонённые дозоры: {rejected}/5\nТекущая миссия: {mission}/{total} ({size} игроков)\nПорядок шерифов: {order}"
+msgid "board.classic"
+msgstr "Миссии: {missions}\nСопротивление: {successes}/{wins}\nШпионы: {failures}/{wins}\nОтклонённые команды: {rejected}/5\nТекущая миссия: {mission}/{total} ({size} игроков)\nПорядок лидеров: {order}"
+
+msgid "board.werewolves"
+msgstr "Осталось проклятий: {curses}\nЗдоровье деревни: {health}\nОтклонённые команды в этом раунде: {rejected}\nТекущий раунд: {round} ({size} игроков)\nПорядок лидеров: {order}"
 
 msgid "stats.votes"
 msgstr "Получено голосов: {count}/{total}."
@@ -156,7 +196,7 @@ msgid "stats.reminder"
 msgstr "Пожалуйста, проголосуйте: {players}"
 
 msgid "stats.summary"
-msgstr "Ваши игры: {games}\nПобеды: {wins}\n\nИгры группы: {group_games}\nПобеды жителей: {villager_wins}\nПобеды оборотней: {werewolf_wins}"
+msgstr "Ваши игры: {games}\nПобеды: {wins}\n\nИгры группы: {group_games}\nПобеды открытой стороны: {villager_wins}\nПобеды скрытой стороны: {werewolf_wins}"
 
 msgid "language.choose"
 msgstr "Выберите язык:"
@@ -170,8 +210,14 @@ msgstr "Язык группы: {language}."
 msgid "language.admin_only"
 msgstr "Только администраторы группы могут изменить язык группы."
 
-msgid "label.villager"
+msgid "label.classic.villager"
+msgstr "Участник Сопротивления"
+
+msgid "label.classic.werewolf"
+msgstr "Шпион"
+
+msgid "label.werewolves.villager"
 msgstr "Житель"
 
-msgid "label.werewolf"
+msgid "label.werewolves.werewolf"
 msgstr "Оборотень"

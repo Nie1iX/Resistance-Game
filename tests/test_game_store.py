@@ -1,6 +1,13 @@
 from random import Random
 
-from resistance.domain import JoinResult, MissionCountResult, Player, StartResult
+from resistance.domain import (
+    GameVariant,
+    JoinResult,
+    MissionCountResult,
+    Player,
+    StartResult,
+    VariantResult,
+)
 from resistance.game_store import CreateResult, GameStore
 
 
@@ -36,3 +43,16 @@ def test_store_carries_selected_mission_count_into_the_match():
     match = store.match(-1)
     assert match is not None
     assert match.mission_count == 3
+
+
+def test_store_carries_selected_variant_into_the_match():
+    store = GameStore(Random(7))
+    assert store.create_lobby(-1, 1) is CreateResult.CREATED
+    assert store.set_variant(-1, 1, False, GameVariant.WEREWOLVES) is VariantResult.UPDATED
+    for user_id in range(1, 6):
+        store.join(-1, Player(user_id, str(user_id)))
+
+    assert store.start(-1, 1, is_admin=False) is StartResult.STARTED
+    match = store.match(-1)
+    assert match is not None
+    assert match.variant is GameVariant.WEREWOLVES
