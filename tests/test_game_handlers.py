@@ -107,8 +107,8 @@ def test_variant_controls_role_labels_and_board_summary():
 
     board = _board(translator, match)
 
-    assert "Curses: ⚫️⚫️🔅" in board
-    assert "Village health: ❤️💔💔" in board
+    assert "Curses: 🔅⚫️⚫️" in board
+    assert "Village health: 💔💔❤️" in board
 
 
 def test_game_router_registers_lobby_button_actions(tmp_path):

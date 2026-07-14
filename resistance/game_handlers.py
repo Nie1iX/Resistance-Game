@@ -711,9 +711,9 @@ def _board(translator: Translator, match: Match) -> str:
     if match.variant is GameVariant.WEREWOLVES:
         return translator.text(
             "board.werewolves",
-            curses=("⚫️" * (3 - match.successful_missions))
-            + ("🔅" * match.successful_missions),
-            health=("❤️" * (3 - match.failed_missions)) + ("💔" * match.failed_missions),
+            curses=("🔅" * match.successful_missions)
+            + ("⚫️" * (3 - match.successful_missions)),
+            health=("💔" * match.failed_missions) + ("❤️" * (3 - match.failed_missions)),
             rejected=match.rejected_teams,
             round=match.mission_index + 1,
             size=match.required_team_size,
