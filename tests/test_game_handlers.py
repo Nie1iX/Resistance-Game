@@ -102,8 +102,13 @@ def test_variant_controls_role_labels_and_board_summary():
     match.variant = GameVariant.WEREWOLVES
     assert _label(translator, match.variant, Role.VILLAGER) == "Villager"
     assert _label(translator, match.variant, Role.WEREWOLF) == "Werewolf"
-    assert "Curses remaining: 3" in _board(translator, match)
-    assert "Village health: 3" in _board(translator, match)
+    match.successful_missions = 1
+    match.failed_missions = 2
+
+    board = _board(translator, match)
+
+    assert "Curses: ⚫️⚫️🔅" in board
+    assert "Village health: ❤️💔💔" in board
 
 
 def test_game_router_registers_lobby_button_actions(tmp_path):

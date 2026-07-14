@@ -184,7 +184,7 @@ msgid "board.classic"
 msgstr "Missions: {missions}\nResistance: {successes}/{wins}\nSpies: {failures}/{wins}\nRejected teams: {rejected}/5\nCurrent mission: {mission}/{total} ({size} players)\nLeader order: {order}"
 
 msgid "board.werewolves"
-msgstr "Curses remaining: {curses}\nVillage health: {health}\nRejected teams this round: {rejected}\nCurrent round: {round} ({size} players)\nLeader order: {order}"
+msgstr "Curses: {curses}\nVillage health: {health}\nRejected teams this round: {rejected}\nCurrent round: {round} ({size} players)\nLeader order: {order}"
 
 msgid "stats.votes"
 msgstr "Votes received: {count}/{total}."

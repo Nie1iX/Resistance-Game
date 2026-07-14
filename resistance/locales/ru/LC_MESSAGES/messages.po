@@ -184,7 +184,7 @@ msgid "board.classic"
 msgstr "Миссии: {missions}\nСопротивление: {successes}/{wins}\nШпионы: {failures}/{wins}\nОтклонённые команды: {rejected}/5\nТекущая миссия: {mission}/{total} ({size} игроков)\nПорядок лидеров: {order}"
 
 msgid "board.werewolves"
-msgstr "Осталось проклятий: {curses}\nЗдоровье деревни: {health}\nОтклонённые команды в этом раунде: {rejected}\nТекущий раунд: {round} ({size} игроков)\nПорядок лидеров: {order}"
+msgstr "Проклятия: {curses}\nЗдоровье деревни: {health}\nОтклонённые команды в этом раунде: {rejected}\nТекущий раунд: {round} ({size} игроков)\nПорядок лидеров: {order}"
 
 msgid "stats.votes"
 msgstr "Получено голосов: {count}/{total}."
