@@ -1,0 +1,159 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Resistance Werewolves\n"
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "start.description"
+msgstr "Resistance: Werewolves is a social deduction game for 5-10 players. Add the bot to a group and use /newgame."
+
+msgid "help.commands"
+msgstr "Commands: /newgame, /join, /missions, /startgame, /cancelgame, /board, /votes, /calltovote, /stats, /language, /grouplanguage."
+
+msgid "rules.link"
+msgstr "Rules: https://boardgamer.ru/pravila-igry-resistance/"
+
+msgid "symbols.text"
+msgstr "Board symbols: ✅ curse lifted, ❌ villagers attacked, ⬜ mission not played."
+
+msgid "ping"
+msgstr "pong"
+
+msgid "error.unavailable"
+msgstr "This action is no longer available."
+
+msgid "join.private_chat"
+msgstr "Start a private chat with the bot, then use /join again."
+
+msgid "group.only"
+msgstr "This command can only be used in a group."
+
+msgid "lobby.exists"
+msgstr "A lobby or game already exists in this group."
+
+msgid "lobby.created"
+msgstr "New game created!"
+
+msgid "lobby.joined"
+msgstr "{name} joined the lobby."
+
+msgid "lobby.already_joined"
+msgstr "You are already in the lobby."
+
+msgid "lobby.full"
+msgstr "The lobby is full. Start the game with /startgame."
+
+msgid "lobby.missing"
+msgstr "There is no lobby in this group. Create one with /newgame."
+
+msgid "lobby.started"
+msgstr "The game has already started."
+
+msgid "lobby.need_players"
+msgstr "The lobby needs 5-10 players before it can start."
+
+msgid "lobby.start_forbidden"
+msgstr "Only the lobby creator or a group administrator can start or cancel the game."
+
+msgid "missions.usage"
+msgstr "Choose the game length before starting: /missions 3 or /missions 5."
+
+msgid "missions.updated"
+msgstr "Mission count: {count}."
+
+msgid "game.started"
+msgstr "The game has started with {players} players. Check your private chat for your secret role."
+
+msgid "game.cancelled"
+msgstr "Game cancelled."
+
+msgid "game.role"
+msgstr "Your secret role is {role}."
+
+msgid "game.werewolves"
+msgstr "The werewolves are: {names}."
+
+msgid "round.build"
+msgstr "Mission {mission}/{total}. Sheriff: {leader}. Choose {size} players for the patrol."
+
+msgid "team.choose"
+msgstr "Choose exactly {size} patrol members."
+
+msgid "team.confirm"
+msgstr "Confirm patrol"
+
+msgid "team.proposed"
+msgstr "Sheriff {leader} proposed this patrol: {members}. Vote in private chat."
+
+msgid "team.vote.prompt"
+msgstr "Approve the patrol: {members}?"
+
+msgid "team.vote.yes"
+msgstr "Approve"
+
+msgid "team.vote.no"
+msgstr "Reject"
+
+msgid "team.vote.approved"
+msgstr "Patrol approved.\nApprove: {approved}\nReject: {rejected}"
+
+msgid "team.vote.rejected"
+msgstr "Patrol rejected ({attempts}/5).\nApprove: {approved}\nReject: {rejected}"
+
+msgid "mission.departed"
+msgstr "The patrol departs: {members}. Its decision is secret."
+
+msgid "mission.prompt"
+msgstr "Choose the patrol outcome."
+
+msgid "mission.success"
+msgstr "Protect the village"
+
+msgid "mission.sabotage"
+msgstr "Attack the villagers"
+
+msgid "mission.result.success"
+msgstr "The patrol succeeded: a curse is lifted. Sabotages: {sabotages}."
+
+msgid "mission.result.failed"
+msgstr "The patrol failed: the werewolves attacked. Sabotages: {sabotages}."
+
+msgid "game.over"
+msgstr "Game over: {winner} win.\n\n{roles}"
+
+msgid "roles"
+msgstr "{name}: {role}"
+
+msgid "board"
+msgstr "Missions: {missions}\nVillagers: {successes}/{wins}\nWerewolves: {failures}/{wins}\nRejected patrols: {rejected}/5\nCurrent mission: {mission}/{total} ({size} players)\nSheriff order: {order}"
+
+msgid "stats.votes"
+msgstr "Votes received: {count}/{total}."
+
+msgid "stats.missing"
+msgstr "There is no active vote."
+
+msgid "stats.reminder"
+msgstr "Please vote: {players}"
+
+msgid "stats.summary"
+msgstr "Your games: {games}\nWins: {wins}\n\nGroup games: {group_games}\nVillager wins: {villager_wins}\nWerewolf wins: {werewolf_wins}"
+
+msgid "language.choose"
+msgstr "Choose a language:"
+
+msgid "language.saved"
+msgstr "Your language: {language}."
+
+msgid "language.group_saved"
+msgstr "Group language: {language}."
+
+msgid "language.admin_only"
+msgstr "Only group administrators can change the group language."
+
+msgid "label.villager"
+msgstr "Villager"
+
+msgid "label.werewolf"
+msgstr "Werewolf"

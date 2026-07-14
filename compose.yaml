@@ -1,0 +1,12 @@
+services:
+  bot:
+    build: .
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN:?Set BOT_TOKEN in .env}
+      DATABASE_PATH: /data/resistance.db
+    restart: unless-stopped
+    volumes:
+      - resistance-data:/data
+
+volumes:
+  resistance-data:

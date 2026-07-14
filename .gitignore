@@ -1,0 +1,9 @@
+*.db
+*.log
+**/__pycache__
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.venv
+.env
+docs/plans/

@@ -1,0 +1,159 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Resistance Werewolves\n"
+"Language: ru\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "start.description"
+msgstr "«Сопротивление: Оборотни» — игра на социальную дедукцию для 5–10 игроков. Добавьте бота в группу и используйте /newgame."
+
+msgid "help.commands"
+msgstr "Команды: /newgame, /join, /missions, /startgame, /cancelgame, /board, /votes, /calltovote, /stats, /language, /grouplanguage."
+
+msgid "rules.link"
+msgstr "Правила: https://boardgamer.ru/pravila-igry-resistance/"
+
+msgid "symbols.text"
+msgstr "Символы: ✅ проклятие снято, ❌ жители атакованы, ⬜ миссия ещё не сыграна."
+
+msgid "ping"
+msgstr "pong"
+
+msgid "error.unavailable"
+msgstr "Это действие больше недоступно."
+
+msgid "join.private_chat"
+msgstr "Запустите личный чат с ботом, затем повторите /join."
+
+msgid "group.only"
+msgstr "Эта команда работает только в группе."
+
+msgid "lobby.exists"
+msgstr "В этой группе уже есть лобби или активная игра."
+
+msgid "lobby.created"
+msgstr "Новая игра создана!"
+
+msgid "lobby.joined"
+msgstr "{name} присоединился к лобби."
+
+msgid "lobby.already_joined"
+msgstr "Вы уже в лобби."
+
+msgid "lobby.full"
+msgstr "Лобби заполнено. Запустите игру командой /startgame."
+
+msgid "lobby.missing"
+msgstr "В этой группе нет лобби. Создайте его командой /newgame."
+
+msgid "lobby.started"
+msgstr "Игра уже началась."
+
+msgid "lobby.need_players"
+msgstr "Для запуска в лобби должно быть 5–10 игроков."
+
+msgid "lobby.start_forbidden"
+msgstr "Запустить или отменить игру может только создатель лобби или администратор группы."
+
+msgid "missions.usage"
+msgstr "До старта выберите длину игры: /missions 3 или /missions 5."
+
+msgid "missions.updated"
+msgstr "Количество миссий: {count}."
+
+msgid "game.started"
+msgstr "Игра началась: игроков — {players}. Проверьте личные сообщения, чтобы узнать секретную роль."
+
+msgid "game.cancelled"
+msgstr "Игра отменена."
+
+msgid "game.role"
+msgstr "Ваша секретная роль — {role}."
+
+msgid "game.werewolves"
+msgstr "Оборотни: {names}."
+
+msgid "round.build"
+msgstr "Миссия {mission}/{total}. Шериф — {leader}. Выберите {size} игроков в дозор."
+
+msgid "team.choose"
+msgstr "Выберите ровно {size} дозорных."
+
+msgid "team.confirm"
+msgstr "Подтвердить дозор"
+
+msgid "team.proposed"
+msgstr "Шериф {leader} предложил дозор: {members}. Голосуйте в личном чате."
+
+msgid "team.vote.prompt"
+msgstr "Одобрить дозор: {members}?"
+
+msgid "team.vote.yes"
+msgstr "Одобрить"
+
+msgid "team.vote.no"
+msgstr "Отклонить"
+
+msgid "team.vote.approved"
+msgstr "Дозор одобрен.\nЗа: {approved}\nПротив: {rejected}"
+
+msgid "team.vote.rejected"
+msgstr "Дозор отклонён ({attempts}/5).\nЗа: {approved}\nПротив: {rejected}"
+
+msgid "mission.departed"
+msgstr "В дозор отправляются: {members}. Их решение останется тайным."
+
+msgid "mission.prompt"
+msgstr "Выберите исход дозора."
+
+msgid "mission.success"
+msgstr "Защитить деревню"
+
+msgid "mission.sabotage"
+msgstr "Напасть на жителей"
+
+msgid "mission.result.success"
+msgstr "Дозор успешен: одно проклятие снято. Следов нападения: {sabotages}."
+
+msgid "mission.result.failed"
+msgstr "Дозор провален: оборотни напали. Следов нападения: {sabotages}."
+
+msgid "game.over"
+msgstr "Игра окончена: победили {winner}.\n\n{roles}"
+
+msgid "roles"
+msgstr "{name}: {role}"
+
+msgid "board"
+msgstr "Миссии: {missions}\nЖители: {successes}/{wins}\nОборотни: {failures}/{wins}\nОтклонённые дозоры: {rejected}/5\nТекущая миссия: {mission}/{total} ({size} игроков)\nПорядок шерифов: {order}"
+
+msgid "stats.votes"
+msgstr "Получено голосов: {count}/{total}."
+
+msgid "stats.missing"
+msgstr "Активного голосования нет."
+
+msgid "stats.reminder"
+msgstr "Пожалуйста, проголосуйте: {players}"
+
+msgid "stats.summary"
+msgstr "Ваши игры: {games}\nПобеды: {wins}\n\nИгры группы: {group_games}\nПобеды жителей: {villager_wins}\nПобеды оборотней: {werewolf_wins}"
+
+msgid "language.choose"
+msgstr "Выберите язык:"
+
+msgid "language.saved"
+msgstr "Ваш язык: {language}."
+
+msgid "language.group_saved"
+msgstr "Язык группы: {language}."
+
+msgid "language.admin_only"
+msgstr "Только администраторы группы могут изменить язык группы."
+
+msgid "label.villager"
+msgstr "Житель"
+
+msgid "label.werewolf"
+msgstr "Оборотень"
